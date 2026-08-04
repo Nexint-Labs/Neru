@@ -13,9 +13,12 @@ The source code for NeruBot. Updated occasionally.
 
 ## How to install?
 - Download the files off the repository
-- Run npm-install
+- Set them into a seperate folder
+- Download and install NPM and NodeJS
+- Run "npm install" inside of this folder using the Command Prompt
+- Make a Discord Bot using discord.dev
 - Config the config.js file
-- Run the start.bat file, or if you're on linux, run node index.js
+- Run the start.bat file, or if you're on linux, run the command "node index.js"
 
 ## Copyright / Bot Issues:
 - This code is open source, usage is governed under my Nex TOS: https://nexint.ca/tos
