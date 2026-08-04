@@ -6,14 +6,14 @@ const isBlacklisted = async function (id, server) {
 
     // cached blacklist data
     // this limits the API requests to MAX once every 5 minutes
-    if ((blacklist.length == 0 || Math.floor(Date.now() / 1000) > Number(date) + delay) && (server != null || server != "")) {
+    if ((blacklist.length == 0 || Math.floor(Date.now() / 1000) > Number(date) + delay) && (server != null && server != "")) {
         try {
 
             // try to get the info from my server
             const update = await fetch(server + '/api/v1/blacklist', {
                 method: 'GET',
                 headers: {
-                    'Authorization': auth,
+                    'Authorization': header,
                     'Content-Type': `application/json`
                 }
             });
