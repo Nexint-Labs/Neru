@@ -1,6 +1,10 @@
+// dotenv loader
+// This is required.
+require('dotenv').config();
+
 // Date Formatter. Used for formatting dates on logs.
 // More customizable way of formatting all the bot logs at the same time.
-const { dateOptions } = require('./config.js');
+const { dateOptions, logFormat, botName } = require('#config/core/core');
 global.DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions); // Ensures a global Date Formatter usable in any bot.
 console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Starting up...');
 
@@ -88,8 +92,27 @@ const readline = require('node:readline');
 const { REST, Routes } = require('discord.js');
 const { spawn } = require('child_process');
 const { Client, Collection, Events, ActivityType } = require('discord.js');
-const { clientId, token, version, intents, partials, logFormat, versionID, botActivity, botStatus, botURL, botType, fileCount, botName } = require('./config.js');
+
+const {
+    clientId,
+    discordToken: token,
+    intents,
+    partials,
+    botActivity,
+    botStatus,
+    botURL,
+    botType
+} = require('#config/core/discord');
+
+const { version, versionID, fileCount } = require('#config/core/update');
 const fetch = (url, init) => import('node-fetch').then(module => module.default(url, init));
+
+try {
+	process.chdir(__dirname);
+	console.log(`New directory: ${process.cwd()}`);
+} catch (err) {
+	console.error(`Error changing directory: ${err}`);
+}
 
 // Create files if they don't exist.
 var dirs = ['./logs', './plugins', './preload'];
@@ -216,9 +239,9 @@ console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Loading console c
 // This part of code makes sure that the backend website works.
 
 // Import expressJS
-const express = require('express')
+const express = require('express');
+const { port } = require('#config/core/api');
 const app = express()
-const { port } = require('./config.js');
 
 // Backend #1 (describe whats going on)
 app.get('/', (req, res) => {
@@ -277,9 +300,12 @@ const main = async () => {
 			for (const file of commandFiles) {
 				const filePath = path.join(commandsPath, file);
 				commandList.push(filePath);
-				const command = require(filePath);
+				const command = await require(filePath);
+				if (command.ready) {
+					await command.ready;
+				}
 				if ('execute' in command) {
-					command.execute();
+					await command.execute();
 				} else if ('help' in command) {
 					helpMenu.push(...command.help());
 				}
@@ -294,7 +320,6 @@ const main = async () => {
 	// Scan for plugins. The command list here is used by the rest of the bot.
 
 	const { ClusterManager, AutoResharderManager, ReClusterManager } = require('discord-hybrid-sharding');
-	const { token } = require('./config.js');
 
 	const manager = new ClusterManager(`${__dirname}/bot.js`, {
 		totalShards: 'auto', // or numeric shard count
@@ -359,6 +384,7 @@ const main = async () => {
 				console.log("[" + DateFormatter.format(Date.now()) + '] [INFO]', `                 Safe mode enabled.                 `);
 			}
 			console.log("[" + DateFormatter.format(Date.now()) + '] [INFO]', '\x1b[36m----------------------------------------------------\x1b[0m');
+			console.log("Bot is running.");
 
 			// Version checking.
 			if (count > 0 && count != fileCount) {
@@ -366,7 +392,7 @@ const main = async () => {
 			} else {
 				updateCheck();
 			}
-			manager.broadcastEval(c => c.user)
+			+			manager.broadcastEval(c => ({ username: c.user?.username, discriminator: c.user?.discriminator }))
 				.then(usernames => {
 					// The result is an array of usernames from each shard
 					// Since the username is the same for all shards, you can take the first one
@@ -396,7 +422,10 @@ const asyncFunctions = async () => {
 	if (!safeMode) {
 		for (let i = 0; i < commandList.length; i++) {
 			count++;
-			const command = require(commandList[i]);
+			const command = await require(commandList[i]);
+			if (command.ready) {
+				await command.ready;
+			}
 			if ('post' in command) {
 				if (verbose) {
 					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Loading the post-loaded JS file "${commandList[i]}".`);

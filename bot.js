@@ -1,6 +1,7 @@
 // Date Formatter. Used for formatting dates on logs.
 // More customizable way of formatting all the bot logs at the same time.
-const { dateOptions } = require('./config.js');
+require('dotenv').config();
+const { dateOptions } = require('#config/core/core');
 global.DateFormatter = new Intl.DateTimeFormat(undefined, dateOptions); // Ensures a global Date Formatter usable in any bot.
 
 // Startup variables.
@@ -52,7 +53,34 @@ const { REST, Routes } = require('discord.js');
 const { spawn } = require('child_process');
 const { Client, Collection, Events, ActivityType } = require('discord.js');
 const { ClusterClient, getInfo, AutoResharderClusterClient } = require('discord-hybrid-sharding');
-const { clientId, token, intents, partials, botActivity, botStatus, botURL, botType } = require('./config.js');
+const {
+    clientId,
+    discordToken: token,
+    intents,
+    partials,
+    botActivity,
+    botStatus,
+    botURL,
+    botType
+} = require('#config/core/discord');
+
+// Get JS files Function
+function getJSFiles(directory) {
+	const files = [];
+
+	for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+		const fullPath = path.join(directory, entry.name);
+
+		if (entry.isDirectory()) {
+			if (entry.name === 'archive') continue;
+			files.push(...getJSFiles(fullPath));
+		} else if (entry.isFile() && entry.name.endsWith('.js')) {
+			files.push(fullPath);
+		}
+	}
+
+	return files;
+}
 
 // More constants that may depend on folders existing.
 const helpMenu = [];
@@ -60,8 +88,6 @@ const commands = [];
 const commandList = [];
 const preloadPath = path.join(__dirname, 'preload');
 const pluginPath = path.join(__dirname, 'plugins');
-const preloadFolders = fs.readdirSync(preloadPath);
-const pluginFolders = fs.readdirSync(pluginPath);
 
 // Load non-constants.
 let count = 0;
@@ -102,22 +128,17 @@ console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Be aware that I a
 	// Loader code for the main server instance.
 	// This jank piece of code loads commands and plugins.
 	if (!safeMode) {
-		for (const folder of preloadFolders) {
-			const commandsPath = path.join(preloadPath, folder);
-			const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-			for (const file of commandFiles) {
-				const filePath = path.join(commandsPath, file);
-				const command = await require(filePath);
-				if ('execute' in command) {
-					if (verbose) {
-						console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Pre-loading the file "${filePath}".`);
-					}
-					await command.execute();
-				} else if (!(`config` in command)) {
-					console.log("[" + DateFormatter.format(Date.now()) + `] [WARN] The pre-loaded file at ${filePath} is missing a required "execute" property. Nothing will be done.`);
+		for (const filePath of getJSFiles(preloadPath)) {
+			const command = require(filePath);
+			if ('execute' in command) {
+				if (verbose) {
+					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Pre-loading the file "${filePath}".`);
 				}
-				count += 1;
+				await command.execute();
+			} else if (!(`config` in command)) {
+				console.log("[" + DateFormatter.format(Date.now()) + `] [WARN] The pre-loaded file at ${filePath} is missing a required "execute" property. Nothing will be done.`);
 			}
+			count += 1;
 		}
 	}
 	if (verbose) {
@@ -164,32 +185,40 @@ console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Be aware that I a
 
 	// Scan for plugins. The command list here is used by the rest of the bot.
 	if (!safeMode) {
-		for (const folder of pluginFolders) {
-			const commandsPath = path.join(pluginPath, folder);
-			const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-			for (const file of commandFiles) {
-				const filePath = path.join(commandsPath, file);
-				commandList.push(filePath);
-				const command = require(filePath);
-				if ('data' in command && 'execute' in command) {
-					if (verbose) {
-						console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Pushing the command "${command.data.name}" in "${filePath}" to JSON.`);
-					}
-					commands.push(command.data.toJSON());
-				} else if (!('execute' in command || 'help' in command || 'command' in command || 'messageCreate' in command || 'post' in command || 'config' in command)) {
-					console.log("[" + DateFormatter.format(Date.now()) + `] [WARN] The command at ${filePath} is not a valid plugin file.`);
-				}
+		for (const filePath of getJSFiles(pluginPath)) {
+			commandList.push(filePath);
+
+			const command = require(filePath);
+
+			if (command.ready) {
+				await command.ready;
 			}
+
+			if ('data' in command && 'execute' in command) {
+				if (verbose) {
+					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Pushing the command "${command.data.name}" in "${filePath}" to JSON.`);
+				}
+				commands.push(command.data.toJSON());
+			} else if (!('execute' in command || 'help' in command || 'command' in command || 'messageCreate' in command || 'post' in command || 'config' in command)) {
+				console.log("[" + DateFormatter.format(Date.now()) + `] [WARN] The command at ${filePath} is not a valid plugin file.`);
+			}
+
 		}
 	}
 	if (verbose) {
 		console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Cached ${commands.length} commands.`);
 	}
 
-	const data = await rest.put(
-		Routes.applicationCommands(clientId),
-		{ body: commands },
-	);
+	// Register globally once during ordinary startup, not from every cluster.
+	// For overlapping graceful reclusters, use a dedicated deployment-time
+	// command registration step instead of this worker-side registration.
+	let data = [];
+	if (client.cluster.id === 0) {
+		data = await rest.put(
+			Routes.applicationCommands(clientId),
+			{ body: commands },
+		);
+	}
 
 	if (verbose) {
 		console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Successfully reloaded ${data.length} commands.`);
@@ -212,7 +241,10 @@ console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Be aware that I a
 	if (!safeMode) {
 		for (let i = 0; i < commandList.length; i++) {
 			count++;
-			const command = require(commandList[i]);
+			const command = await require(commandList[i]);
+			if (command.ready) {
+				await command.ready;
+			}
 			if ('data' in command && 'execute' in command) {
 				if (verbose) {
 					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Loading the command "${command.data.name}" in "${commandList[i]}".`);
@@ -222,7 +254,7 @@ console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Be aware that I a
 				if (verbose) {
 					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Loading the JS file "${commandList[i]}".`);
 				}
-				command.execute();
+				await command.execute();
 			} else if ('help' in command) {
 				if (verbose) {
 					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Adding the JS file "${commandList[i]}" to the console help menu.`);
@@ -274,7 +306,7 @@ console.log("[" + DateFormatter.format(Date.now()) + '] [INFO] Be aware that I a
 	await delay(1000);
 
 	// Login to the bot
-	client.login(token);
+	await client.login(token);
 })();
 
 // Parses functions that happen asyncronously when the bot finishes starting. Handles update checks, etc.
@@ -283,7 +315,10 @@ const asyncFunctions = async () => {
 	if (!safeMode) {
 		for (let i = 0; i < commandList.length; i++) {
 			count++;
-			const command = require(commandList[i]);
+			const command = await require(commandList[i]);
+			if (command.ready) {
+				await command.ready;
+			}
 			if ('post' in command) {
 				if (verbose) {
 					console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Loading the post-loaded JS file "${commandList[i]}".`);

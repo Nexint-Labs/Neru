@@ -1,7 +1,7 @@
 // Sample code to import a client and other constants.
 
-const { token, restart, botActivity, botStatus, botURL, botType } = require('../../config.js');
-const { helpMenu, readline, spawn, exitHandler, server } = require('../../index.js');
+const { restart } = require('#config/core/core');
+const { helpMenu, readline, spawn, exitHandler, server } = require('#index');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 module.exports = {

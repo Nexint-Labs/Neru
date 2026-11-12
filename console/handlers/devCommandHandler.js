@@ -1,33 +1,5 @@
-const { version, versionID, botChannel, mikuVer, mikuChannel } = require('../../config.js');
-const { latestVersion } = require('../../index.js');
-
-const Sequelize = require('sequelize');
-
-const devdb = new Sequelize('database', 'user', 'password', {
-    host: 'localhost',
-    dialect: 'sqlite',
-    logging: false,
-    // SQLite only
-    storage: 'devdb.sqlite',
-});
-
-const chatLog = devdb.define('chatLog', {
-    channelId: Sequelize.STRING,
-    content: Sequelize.TEXT,
-    author: Sequelize.STRING
-});
-
-const updates = devdb.define('updates', {
-    channelId: {
-        type: Sequelize.STRING,
-    },
-    channel: {
-        type: Sequelize.STRING,
-    },
-    type: {
-        type: Sequelize.STRING,
-    },
-});
+const { version, versionID, botChannel, mikuVer, mikuChannel } = require('#config/core/update');
+const { botName } = require('#config/core/core');
 
 module.exports = {
     // Example of a help menu given by the bot.
@@ -54,7 +26,7 @@ module.exports = {
                     case "v":
                     case 'version':
                         console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Printing the version`);
-                        console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] MikuBot Version: ${mikuVer}.`);
+                        console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] ${botName}Bot Version: ${mikuVer}.`);
                         console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] OpenBot Version: ${version} (Version ID: ${versionID}) / Latest version ID: ${latestVersion}.`);
                         if (latestVersion > versionID) {
                             console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] ${latestVersion - versionID} commits behind.`);
@@ -70,7 +42,7 @@ module.exports = {
                     case "b":
                     case 'build':
                         console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] Printing the build!`);
-                        console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] MikuBot v${mikuVer}-${mikuChannel}.`);
+                        console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] ${botName}Bot v${mikuVer}-${mikuChannel}.`);
                         console.log("[" + DateFormatter.format(Date.now()) + `] [INFO] OpenBot v${version}-${botChannel}.`);
                         console.log("[" + DateFormatter.format(Date.now()) + '] [INFO]', '\x1b[36m--------------------- Nex 2025 ---------------------\x1b[0m');
                         break;
