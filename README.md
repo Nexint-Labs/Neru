@@ -32,13 +32,11 @@ Feature availability may differ between deployments.
 
 ## AI Disclosure
 
-Neru was developed with the assistance of AI. However, I independently reviewed the current v2 release and made sure the code is suitable for public release.
+This program's development was sped up with AI, however I primarily used it for pentesting and migrations.
 
-I wrote the majority of the bot's original foundation myself. ChatGPT primarily assisted with migrations, debugging, code reviews, and architectural improvements.
+Previous implementations of Neru have used AI in the past. You have been warned.
 
-Some commands were developed almost entirely with AI assistance, but the vast majority of the codebase remains minimally AI-assisted.
-
-Documentation does not exist, but may be generated with Codex.
+This program is a heavy WIP and is actively being modernized. This program is not expected to be finished for years.
 
 ## Prerequisites
 
