@@ -71,6 +71,21 @@ function connect() {
             });
             await reload("Remote Reload")
         }
+        if (data.type === "getMemory") {
+            const memory = process.memoryUsage();
+
+            ws.send(JSON.stringify({
+                type: "memory",
+                value: {
+                    pid: process.pid,
+                    rss: memory.rss,
+                    heapUsed: memory.heapUsed,
+                    heapTotal: memory.heapTotal,
+                    external: memory.external,
+                    uptime: process.uptime()
+                }
+            }));
+        }
     });
 
     ws.on("error", (error) => {
