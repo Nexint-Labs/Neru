@@ -1,36 +1,37 @@
 {
-  "name": "Prism",
-  "version": "0.5.0",
-  "description": "All in one Discord bot!",
+  "name": "nexapiv2",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test \"test/**/*.test.js\"",
-    "start": "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Nexint",
-  "license": "AGPL-3.0-only",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
+    "chalk": "^6.0.1",
     "discord-hybrid-sharding": "^3.0.1",
-    "discord.js": "^14.14.1",
-    "dotenv": "^18.0.8",
-    "express": "^5.2.1",
+    "discord.js": "^14.28.1",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "http": "^0.0.1-security",
     "linkify-it": "^6.1.0",
-    "node-fetch": "^3.3.2",
     "profanease": "^2.0.3",
-    "readline-sync": "^1.4.10",
-    "redis": "^6.2.1",
-    "sequelize": "^6.37.5",
-    "sqlite3": "^6.0.1"
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1",
+    "ws": "^8.23.0"
   },
   "imports": {
     "#config/*": "./config/*.js",
     "#functions/*": "./functions/*.js",
+    "#functions/*.mjs": "./functions/*.mjs",
     "#preload/*": "./preload/*.js",
     "#console/*": "./console/*.js",
     "#bot": "./bot.js",
-    "#index": "./index.js"
-  },
-  "devDependencies": {
-    "dependency-cruiser": "^18.7.2"
+    "#index": "./index.js",
+    "#apps/*": "./apps/*.js",
+    "#appHelpers/*": "./appHelpers/*.js"
   }
 }
