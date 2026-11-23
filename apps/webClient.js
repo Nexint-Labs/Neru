@@ -1,8 +1,11 @@
-const { frameName, frameVer, frameID } = require("#config/core/core");
+const { frameName, frameVer, frameID, restart } = require("#config/core/core");
 const { pluginName, pluginVer } = require("#config/cosmetic/config");
 const { apiServer } = require("#config/discord/api/NexAPI");
 const { log } = require("#functions/core/log.mjs");
+const { gracefulShutdown, refreshCycle, reload } = require("#functions/core/powerCycle");
 const WebSocket = require("ws");
+const delay = require("#functions/core/delay")
+const { spawn } = require("node:child_process");
 
 let socket = null;
 let reconnectTimer = null;
@@ -18,7 +21,7 @@ function connect() {
         log.event(`Connected to ${frameName} API.`);
     });
 
-    ws.on("message", (raw) => {
+    ws.on("message", async (raw) => {
         let data;
 
         try {
@@ -32,6 +35,41 @@ function connect() {
                 type: "name",
                 value: `${frameName} v${frameVer} (${pluginName} v${pluginVer}) / Version ID: ${frameID}`
             }));
+        }
+        if (data.type === "restart") {
+            await new Promise((resolve, reject) => {
+                ws.send(JSON.stringify({
+                    type: "restart",
+                    value: "Restart acknowledged."
+                }), error => error ? reject(error) : resolve());
+            });
+            await gracefulShutdown("Remote Restart", false);
+            const child = spawn(restart, {
+                detached: true,
+                shell: true,
+                stdio: 'ignore'
+            })
+            child.unref()
+            await delay(1000)
+            process.exit(0);
+        }
+        if (data.type === "refresh") {
+            await new Promise((resolve, reject) => {
+                ws.send(JSON.stringify({
+                    type: "refresh",
+                    value: "Refresh acknowledged."
+                }), error => error ? reject(error) : resolve());
+            });
+            await refreshCycle("Remote Refresh")
+        }
+        if (data.type === "reload") {
+            await new Promise((resolve, reject) => {
+                ws.send(JSON.stringify({
+                    type: "reload",
+                    value: "Reload acknowledged."
+                }), error => error ? reject(error) : resolve());
+            });
+            await reload("Remote Reload")
         }
     });
 
