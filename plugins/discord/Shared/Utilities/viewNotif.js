@@ -65,8 +65,6 @@ module.exports = {
                     console.log("Oops! This shouldn't happen lol")
             }
 
-            console.log(result)
-
             if (result.error) return null;
 
             return result.content.map(notif => ({

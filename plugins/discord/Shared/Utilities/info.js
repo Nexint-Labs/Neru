@@ -19,7 +19,7 @@ module.exports = {
 	cooldown: 5,
 	data: new SlashCommandBuilder()
 		.setName('info')
-		.setDescription(`Info about ${frameName}bot!`)
+		.setDescription(`Info about ${pluginName}bot!`)
 		.setIntegrationTypes([0, 1])
 		.setContexts([0, 1, 2]),
 	async execute(interaction) {

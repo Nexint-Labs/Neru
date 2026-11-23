@@ -6,7 +6,7 @@ module.exports = {
     apiToken: process.env.SERVER_TOKEN ?? "",
     header: process.env.SERVER_HEADER ?? "",
     delay: 300, // delay before checking servers (caching), idk if this issuse anywhere help
-    advertChance: 0.1, // Chance of an advertisement (0 - 1)
-    notifChance: 0.1, // Chance of a notification
+    advertChance: 0.1, // Chance of an advertisement (0 to 1)
+    notifChance: 0.1, // Chance of a notification (0 to 1)
     apiExt: "/api/v1", // API Extension
 }

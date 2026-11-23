@@ -29,13 +29,13 @@ const neutral = [
     "Maybe.",
     "Perhaps...",
     "50/50.",
-    "Neru is thinking...",
+    "Miku is thinking...",
     "The leek is undecided.",
     "Error 39: Prediction unavailable.",
     "Ask Teto instead.",
     "I forgor 💀",
     "The future is buffering...",
-    "Neru refuses to elaborate."
+    "Miku refuses to elaborate."
 ];
 
 const negative = [
@@ -47,13 +47,13 @@ const negative = [
     "Absolutely not.",
     "Nah.",
     "Nope!",
-    "Neru disapproves.",
+    "Miku disapproves.",
     "The leek says no.",
     "Not happening.",
     "Even Teto says no.",
     "That's a hard no.",
     "The odds are NOT in your favour.",
-    "Neru has rejected your proposal.",
+    "Miku has rejected your proposal.",
     "No. ♪"
 ];
 
