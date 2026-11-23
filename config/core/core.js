@@ -1,21 +1,31 @@
-// Core file that runs basic stuff
-let date = new Date();
-
 module.exports = {
-    devMode: false,
+    devMode: false, // Determines dev mode?
     devMsg: "This bot is running in dev mode. Developer functions are enabled.",
     devName: "Nexint",
-    botName: "Neru",
-    botFile: "neru.png",
-
-    // These can be changed, but only if you know what you are doing.
     dateOptions: {
         hour: "numeric",
         minute: "numeric",
         second: "numeric",
     },
-    logFormat: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`, // Log format of the bot
-    date,
+    verbose: false, // Extra Logging Info
+    autoUpdate: true,
+    frameName: "Prism", // Unified Framework Name
+    frameVer: "0.7.1-dev", // Unified Framework version
+    frameID: 17, // Framework version ID
+    updateURL: "https://github.com/Nexint-Labs/NexAPIv2/",
+    updateSource: "https://raw.githubusercontent.com/Nexint-Labs/NexAPIv2/refs/heads/main/ver.txt",
+
     restart: "start start.bat", // Restart command. This would be different on a linux based system. It would be "sh start.sh".
-    source: "https://github.com/Nexint-Labs/Prism"
+    // args: ['--', 'bash', '-c', "./start.sh"],
+
+    /*
+    It's in your best interest to not change this unless you know what you're doing.
+    Please don't change this :sob:
+    Types: warn, shutdown, continue
+    Recommended: uncaught exceptions should shut down, unhandled rejections should warn.
+    */
+    errorPolicy: {
+        uncaughtException: "shutdown",
+        unhandledRejection: "warn",
+    }
 }

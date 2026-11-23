@@ -1,3 +1,4 @@
 module.exports = {
-    port: 3000
+    token: process.env.SERVER_TOKEN,
+    port: process.env.PORT
 }
