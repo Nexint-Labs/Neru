@@ -12,7 +12,7 @@ module.exports = {
     frameName: "Prism", // Unified Framework Name
     frameVer: "0.7.1-dev", // Unified Framework version
     frameID: 17, // Framework version ID
-    updateURL: "https://github.com/Nexint-Labs/NexAPIv2/",
+    updateURL: "https://github.com/Nexint-Labs/Neru/",
     updateSource: "https://raw.githubusercontent.com/Nexint-Labs/NexAPIv2/refs/heads/main/ver.txt",
 
     restart: "start start.bat", // Restart command. This would be different on a linux based system. It would be "sh start.sh".
