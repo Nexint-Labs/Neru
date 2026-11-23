@@ -166,6 +166,7 @@ const main = async () => {
     log.info("        Stay up to date for the best features.        ");
     log.info('\x1b[36m----------------------------------------------------\x1b[0m');
     log.success(`Done in ${(Date.now() - startLoad) / 1000} seconds!`)
+    console.log("Bot is running.")
 
     await updateCheck()
 
